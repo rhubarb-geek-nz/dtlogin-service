@@ -17,7 +17,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
-# $Id: package.sh 43 2021-05-16 12:05:55Z rhubarb-geek-nz $
+# $Id: package.sh 54 2021-05-19 19:15:23Z rhubarb-geek-nz $
 #
 
 if test 0 -eq $(id -u)
@@ -117,14 +117,14 @@ ExecStart=/usr/dt/bin/dtlogin -nodaemon
 Alias=display-manager.service
 EOF
 
-	DEPENDS="dtlogin, rpcbind, xset, xsetroot, xrdb"
+	DEPENDS="dtlogin, rpcbind, xset, xsetroot, xrdb, motif"
 
 	case "$ID" in
 		opensuse | opensuse.* | suse )
 			DEPENDS="$DEPENDS, terminfo, xorg-x11-server"
 			;;
 		fedora | centos )
-			DEPENDS="$DEPENDS, ncurses-term, xorg-x11-server-Xorg, xorg-x11-fonts-misc, xorg-x11-fonts-75dpi, xorg-x11-fonts-100dpi, xorg-x11-fonts-Type1, xorg-x11-fonts-ISO8859-1-75dpi, xorg-x11-fonts-ISO8859-1-100dpi"
+			DEPENDS="$DEPENDS, ncurses-term, xorg-x11-server-Xorg, xorg-x11-fonts-misc, xorg-x11-fonts-75dpi, xorg-x11-fonts-100dpi, xorg-x11-fonts-Type1, xorg-x11-fonts-ISO8859-1-75dpi, xorg-x11-fonts-ISO8859-1-100dpi, xorg-x11-drivers"
 			;;
 		*)
 			TERMINFO=/usr/share/terminfo/d/dtterm
