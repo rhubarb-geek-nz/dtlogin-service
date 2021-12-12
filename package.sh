@@ -17,7 +17,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
-# $Id: package.sh 58 2021-06-23 15:42:14Z rhubarb-geek-nz $
+# $Id: package.sh 61 2021-11-13 05:56:00Z rhubarb-geek-nz $
 #
 
 if test 0 -eq $(id -u)
@@ -123,7 +123,7 @@ EOF
 		opensuse | opensuse.* | suse )
 			DEPENDS="$DEPENDS, terminfo, xorg-x11-server"
 			;;
-		fedora | centos | rocky )
+		fedora | centos | rocky | almalinux )
 			DEPENDS="$DEPENDS, ncurses-term, xorg-x11-server-Xorg, xorg-x11-fonts-misc, xorg-x11-fonts-75dpi, xorg-x11-fonts-100dpi, xorg-x11-fonts-Type1, xorg-x11-fonts-ISO8859-1-75dpi, xorg-x11-fonts-ISO8859-1-100dpi, xorg-x11-drivers"
 			;;
 		*)
