@@ -30,9 +30,14 @@ THIS="$0"
 MAKERPM=false
 MAKEDEB=false
 
-svn log -q "$THIS" > /dev/null
+if ( cd .git )
+then
+	SVNVERS=$(git log --oneline "$THIS" | wc -l)
+else
+	svn log -q "$THIS" > /dev/null
 
-SVNVERS=$(svn log -q "$THIS" | grep -v "\----------" | wc -l)
+	SVNVERS=$(svn log -q "$THIS" | grep -v "\----------" | wc -l)
+fi
 
 osRelease()
 {
