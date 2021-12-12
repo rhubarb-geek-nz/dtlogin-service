@@ -17,7 +17,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
-# $Id: package.sh 41 2021-05-08 21:47:23Z rhubarb-geek-nz $
+# $Id: package.sh 43 2021-05-16 12:05:55Z rhubarb-geek-nz $
 #
 
 if test 0 -eq $(id -u)
@@ -27,6 +27,8 @@ then
 fi
 
 THIS="$0"
+MAKERPM=false
+MAKEDEB=false
 
 svn log -q "$THIS" > /dev/null
 
@@ -65,14 +67,38 @@ cleanup
 
 trap cleanup 0
 
+for d in $(. /etc/os-release ; echo $ID $ID_LIKE)
+do
+	case "$d" in
+		debian | ubuntu )
+			MAKEDEB=true
+			;;
+		suse | opensuse | rhel | centos | fedora )
+			MAKERPM=true
+			;;
+		* )
+			;;
+	esac
+
+	if $MAKEDEB
+	then
+		break
+	fi
+
+	if $MAKERPM
+	then
+		break
+	fi
+done
+
 test -n "$SVNVERS"
 
-ID=$(osRelease ID)
+ID=$(osRelease ID | sed "y/-/./")
 VERSION_ID=$(osRelease VERSION_ID)
 RELEASE="1.$ID.$VERSION_ID"
 VERSION="1.0.$SVNVERS"
 
-if rpmbuild --version
+if $MAKERPM
 then
 	mkdir data
 	mkdir -p data/lib/systemd/system
@@ -91,12 +117,38 @@ ExecStart=/usr/dt/bin/dtlogin -nodaemon
 Alias=display-manager.service
 EOF
 
+	DEPENDS="dtlogin, rpcbind, xset, xsetroot, xrdb"
+
+	case "$ID" in
+		opensuse | opensuse.* | suse )
+			DEPENDS="$DEPENDS, terminfo, xorg-x11-server"
+			;;
+		fedora | centos )
+			DEPENDS="$DEPENDS, ncurses-term, xorg-x11-server-Xorg, xorg-x11-fonts-misc, xorg-x11-fonts-75dpi, xorg-x11-fonts-100dpi, xorg-x11-fonts-Type1, xorg-x11-fonts-ISO8859-1-75dpi, xorg-x11-fonts-ISO8859-1-100dpi"
+			;;
+		*)
+			TERMINFO=/usr/share/terminfo/d/dtterm
+
+			ls -ld "$TERMINFO"
+
+			rpm -q --whatprovides "$TERMINFO"
+
+			TERMINFO_RPM=$(rpm -q --qf "%{NAME}" --whatprovides "$TERMINFO")
+
+			if (echo $DEPENDS | grep -v ", $TERMINFO_RPM," > /dev/null)
+			then
+				DEPENDS="$DEPENDS, $TERMINFO_RPM"
+			fi
+			;;
+	esac
+
+
 	cat > rpm.spec << EOF
 Summary: Common Desktop Environment Login Manager
 Name: dtlogin-service
 Version: $VERSION
 Release: $RELEASE
-Requires: dtlogin, xorg-x11-server-Xorg, xorg-x11-fonts-misc, xorg-x11-fonts-75dpi, xorg-x11-fonts-100dpi, xorg-x11-fonts-Type1, xrdb, xset, xsetroot, xorg-x11-fonts-ISO8859-1-75dpi, xorg-x11-fonts-ISO8859-1-100dpi, xorg-x11-fonts-ISO8859-2-75dpi, xorg-x11-fonts-ISO8859-2-100dpi, xorg-x11-fonts-ISO8859-9-75dpi, xorg-x11-fonts-ISO8859-9-100dpi, xorg-x11-fonts-ISO8859-14-75dpi, xorg-x11-fonts-ISO8859-14-100dpi, xorg-x11-fonts-ISO8859-15-75dpi, xorg-x11-fonts-ISO8859-15-100dpi, ncurses-term
+Requires: $DEPENDS
 BuildArch: noarch
 License: LGPLv2+
 Group: User Interface/X
@@ -123,7 +175,7 @@ fi
 
 rm -rf data
 
-if dpkg --print-architecture
+if $MAKEDEB
 then
 
 	mkdir -p data/DEBIAN data/etc/X11 data/etc/systemd/system data/lib/systemd/system
@@ -138,11 +190,10 @@ After=systemd-user-sessions.service
 
 [Service]
 ExecStart=/usr/dt/bin/dtlogin -nodaemon
+
+[Install]
+Alias=display-manager.service
 EOF
-
-	ln -svf /lib/systemd/system/dtlogin.service data/etc/systemd/system/display-manager.service
-
-	ln -svf /lib/systemd/system/graphical.target data/etc/systemd/system/default.target
 
 	SIZE=$(du -sk data | while read A B; do echo $A; break; done)
 
