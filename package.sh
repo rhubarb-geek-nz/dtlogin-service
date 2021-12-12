@@ -17,7 +17,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
-# $Id: package.sh 61 2021-11-13 05:56:00Z rhubarb-geek-nz $
+# $Id: package.sh 74 2021-11-29 20:39:04Z rhubarb-geek-nz $
 #
 
 if test 0 -eq $(id -u)
@@ -178,9 +178,7 @@ rm -rf data
 if $MAKEDEB
 then
 
-	mkdir -p data/DEBIAN data/etc/X11 data/etc/systemd/system data/lib/systemd/system
-
-	echo /usr/dt/bin/dtlogin > data/etc/X11/default-display-manager
+	mkdir -p data/DEBIAN data/lib/systemd/system
 
 	cat > data/lib/systemd/system/dtlogin.service << EOF
 [Unit]
@@ -201,7 +199,7 @@ EOF
 Package: dtlogin-service
 Version: $VERSION-$RELEASE
 Architecture: all
-Depends: dtlogin, rpcbind, xserver-xorg-input-libinput, xserver-xorg-video-fbdev, xfonts-intl-european
+Depends: dtlogin, rpcbind, xserver-xorg-input-all, xserver-xorg-video-fbdev, xfonts-intl-european
 Section: x11
 Priority: optional
 Homepage: https://sourceforge.net/p/cdesktopenv/wiki/CDE%20on%20the%20Raspberry%20Pi/
