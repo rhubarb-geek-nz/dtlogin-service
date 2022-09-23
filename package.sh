@@ -17,7 +17,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
-# $Id: package.sh 74 2021-11-29 20:39:04Z rhubarb-geek-nz $
+# $Id: package.sh 182 2022-08-20 23:44:41Z rhubarb-geek-nz $
 #
 
 if test 0 -eq $(id -u)
@@ -30,7 +30,7 @@ THIS="$0"
 MAKERPM=false
 MAKEDEB=false
 
-if ( cd .git )
+if test -d .git
 then
 	SVNVERS=$(git log --oneline "$THIS" | wc -l)
 else
@@ -38,24 +38,6 @@ else
 
 	SVNVERS=$(svn log -q "$THIS" | grep -v "\----------" | wc -l)
 fi
-
-osRelease()
-{
-	(
-		set -e
-		. /etc/os-release
-		case "$1" in
-			ID )
-				echo "$ID"
-				;;
-			VERSION_ID )
-				echo "$VERSION_ID"
-				;;
-			* )
-			;;
-		esac
-	)
-}
 
 cleanup()
 {
@@ -78,7 +60,7 @@ do
 		debian | ubuntu )
 			MAKEDEB=true
 			;;
-		suse | opensuse | rhel | centos | fedora )
+		suse | opensuse | rhel | centos | fedora | mariner )
 			MAKERPM=true
 			;;
 		* )
@@ -98,8 +80,8 @@ done
 
 test -n "$SVNVERS"
 
-ID=$(osRelease ID | sed "y/-/./")
-VERSION_ID=$(osRelease VERSION_ID)
+ID=$(. /etc/os-release ; echo $ID)
+VERSION_ID=$(. /etc/os-release ; echo $VERSION_ID)
 RELEASE="1.$ID.$VERSION_ID"
 VERSION="1.0.$SVNVERS"
 
@@ -146,7 +128,6 @@ EOF
 			fi
 			;;
 	esac
-
 
 	cat > rpm.spec << EOF
 Summary: Common Desktop Environment Login Manager
