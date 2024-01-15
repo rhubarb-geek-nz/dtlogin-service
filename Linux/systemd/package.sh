@@ -2,7 +2,7 @@
 #
 #  Copyright 2021, Roger Brown
 #
-#  This file is part of rhubarb pi.
+#  This file is part of rhubarb-geek-nz/dtlogin-service.
 #
 #  This program is free software: you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License as published by the
@@ -17,8 +17,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
-# $Id: package.sh 182 2022-08-20 23:44:41Z rhubarb-geek-nz $
-#
 
 if test 0 -eq $(id -u)
 then
@@ -29,15 +27,7 @@ fi
 THIS="$0"
 MAKERPM=false
 MAKEDEB=false
-
-if test -d .git
-then
-	SVNVERS=$(git log --oneline "$THIS" | wc -l)
-else
-	svn log -q "$THIS" > /dev/null
-
-	SVNVERS=$(svn log -q "$THIS" | grep -v "\----------" | wc -l)
-fi
+SVNVERS=$(git log --oneline "$THIS" | wc -l)
 
 cleanup()
 {
