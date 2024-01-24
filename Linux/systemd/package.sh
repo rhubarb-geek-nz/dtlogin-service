@@ -70,7 +70,7 @@ done
 
 test -n "$SVNVERS"
 
-ID=$(. /etc/os-release ; echo $ID)
+ID=$(. /etc/os-release ; echo $ID | sed y/-/./ )
 VERSION_ID=$(. /etc/os-release ; echo $VERSION_ID)
 RELEASE="1.$ID.$VERSION_ID"
 VERSION="1.0.$SVNVERS"
